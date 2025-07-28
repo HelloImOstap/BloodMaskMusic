@@ -3,5 +3,7 @@
     "express": "^5.1.0",
     "multer": "^2.0.2"
   },
-  "start": "node server.js"
+  "scripts": {
+    "start": "node bot.js"
+  }
 }
