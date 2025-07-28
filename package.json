@@ -4,6 +4,6 @@
     "multer": "^2.0.2"
   },
   "scripts": {
-    "start": "node bot.js"
+    "start": "node server.js"
   }
 }
