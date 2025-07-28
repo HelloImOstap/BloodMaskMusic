@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Mask Music</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/public/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="social_header">
+    <a href="/albums.html" style="color: rgb(200,0,0);">Albums</a>
+    <a href="/singles.html">Singles</a>
+    <a href="/">Social links</a>
+</div>
+<div class="albums_albums">
+</div>
+<script>
+async function init(json_src) {
+    let audio;
+    let rgb;
+    let gradient;
+    let response = await fetch(json_src)
+
+    if(response.ok){
+        let tracksRAW = await response.json()
+        let tracks = tracksRAW.filter(el => el.album)
+        let albums = {}
+        tracks.forEach(track => {
+            if (!albums[track.album]) {
+                albums[track.album] = []
+            }
+            albums[track.album].push(track)
+        })
+        Object.keys(albums).forEach(album => {
+            let albumSafeId = album.replace(/\ |\d+|\./g, '')
+            $('.albums_albums').append(`
+                <div class="albums_album" id="album${albumSafeId}">
+                    <img src="${albums[album][0].imgUrl}" width="300px">
+                    <p>${album}</p>
+                </div>
+            `)
+            $(`#album${albumSafeId}`).click(() => {
+                let albumExists = Object.keys(albums).find(el => el == album)
+                // console.log(albums[albumExists]) виведе масив з треками
+                $(".social_header").remove()
+                $('.albums_albums').remove()
+                $('body').append(`
+                    <div class="albums_album_clicked">
+                        <img src="${albums[albumExists][0].imgUrl}" id="hiddenImage" style="display: none;" crossorigin="anonymous">
+                        <div style="background-color: black;">
+                            <a href="#" onclick="location.reload()">< Back</a>
+                        </div>
+                        <div class="albums_image_box" style="background-image: url('${albums[albumExists][0].imgUrl}')"></div>
+                        <p>${albumExists.toUpperCase()}</p>
+                        <div class="albums_album_tracks">
+                        </div>
+                    </div>
+                `)
+                $('#hiddenImage').on("load", function(){
+                    const colorThief = new ColorThief()
+                    const dominantColor = colorThief.getColor(this)
+                    rgb = `rgb(${dominantColor.join(',')})`
+                    gradient = `linear-gradient(45deg, rgb(50, 0, 0), ${rgb}`
+                    let result = ""
+                    albums[albumExists].forEach(track => {
+                        let id = track.name.replace('.mp3','').replace(/\.|\ |\'|\,|\!|\?|\(|\)/g,'_')
+                        result += `
+                            <div class="albums_album_track" data-track="${id}" style="background: ${gradient});">
+                                <button align="left" class="playTrack" style="background: ${gradient});">⨞</button>
+                                <p>${albums[albumExists].indexOf(track) + 1}. ${track.name.replace('.mp3','')}</p>
+                            </div>`
+                    })
+                    $(".albums_album_tracks").append(result)
+                    $(`.albums_album_tracks`).on('click', '.playTrack', function() {
+                        if($(this).text() == "||"){
+                            audio.pause()
+                            $(this).text("⨞")
+                        }else{
+                            $('.playTrack').text("⨞")
+                            albums[albumExists].forEach(track => {
+                                if(audio) { audio.pause() }
+                                audio = new Audio(track.url)
+                                audio.pause()
+                            })
+                            let trackName = $(this).closest("[data-track]").data("track")
+                            let trackFind = tracks.find(el => el.name.replace('.mp3','').replace(/\.|\ |\'|\,|\!|\?|\(|\)/g,'_') == trackName)
+                            audio = new Audio(trackFind.url)
+                            audio.play()
+                            $(this).text("||")
+                        }
+                    })
+                })
+            })
+        })
+    }
+}
+init('public/tracks.json')
+</script>
+</body>
+</html>

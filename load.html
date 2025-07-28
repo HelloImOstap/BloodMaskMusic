@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load tracks</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <style>
+      *{ margin: 0px; }
+      body{
+        font-family: "Open Sans", sans-serif;
+      }
+    </style>
+</head>
+<body>
+    <progress id="progressBar" value="0" max="100" style="width: 100%; display: none;"></progress>
+<p id="status"></p>
+    <h2>Upload single</h2>
+    <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+      <input type="text" name="singleName" placeholder="singleName"> <br>
+      <p>tracks</p>
+      <input type="file" name="file" accept=".mp3"> <br>
+      <p>image</p>
+      <input type="file" name="image" accept=".jpg, .png, .jpeg">
+      <button type="submit">Завантажити</button>
+    </form>
+    <br>
+    <br>
+    <h2>Upload album</h2>
+    <form action="/uploadAlbum" method="post" enctype="multipart/form-data" id="uploadForm">
+      <input type="text" name="albumName" placeholder="albumName"> <br>
+      <p>tracks</p>
+      <input type="file" name="files" accept=".mp3" multiple> <br>
+      <p>image</p>
+      <input type="file" name="albumImage" accept=".jpg, .png, .jpeg">
+      <button type="submit">Завантажити</button>
+    </form>
+    <br>
+    <br>
+    <br>
+    <div class="tracks"></div>
+    <div class="albums"></div>
+<script>
+async function read(url) {
+    let response = await fetch(url)
+    if(response.ok){
+        let tracks = await response.json()
+        tracks.sort((a, b) => a.name.localeCompare(b.name))
+        tracks.forEach((track) => {
+          if(track.album){
+            $('.tracks').append(`
+              <div class="track" id="track${track.url}">
+                  <p>${track.name}</p>
+                  <span style='color: gray;'>ALBUM | ${track.album}</span>
+                  <img src="${track.imgUrl}" width="50px">
+              </div>
+              <hr>
+            `)
+          }else{
+            $('.tracks').append(`
+              <div class="track" id="track${track.url}">
+                  <p>${track.name}</p>
+                  <span style='color: gray;'>${track.single_name}</span>
+                  <img src="${track.imgUrl}" width="50px">
+              </div>
+              <hr>
+            `)
+          }
+        })
+        
+    }
+}
+read('public/tracks.json')
+</script>
+<!-- PROGRESS BAR --> <script> 
+document.getElementById('uploadForm').onsubmit = function (e) {
+  e.preventDefault()
+
+  const form = document.getElementById('uploadForm')
+  const formData = new FormData(form)
+  const xhr = new XMLHttpRequest()
+  const progressBar = document.getElementById('progressBar')
+  const statusText = document.getElementById('status')
+
+  xhr.open('POST', '/upload', true)
+
+  xhr.upload.onloadstart = () => {
+    progressBar.style.display = 'block'
+    progressBar.value = 0
+    statusText.textContent = 'Завантаження почалось...'
+  }
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      const percent = (e.loaded / e.total) * 100
+      progressBar.value = percent
+      statusText.textContent = `Завантажено: ${percent.toFixed(1)}%`
+    }
+  }
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      statusText.textContent = '✅ Успішно завантажено!'
+      progressBar.style.display = 'none'
+      form.reset()
+      // optionally: перезавантажити треки
+    } else {
+      statusText.textContent = '❌ Помилка при завантаженні.'
+    }
+  }
+
+  xhr.onerror = () => {
+    statusText.textContent = '❌ Помилка зʼєднання з сервером.'
+  }
+
+  xhr.send(formData)
+};
+</script>  <!-- PROGRESS BAR -->
+
+
+</body>
+</html>

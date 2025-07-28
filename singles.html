@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Mask Music</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/public/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+</head>
+<body>
+<audio src="" id="audioElement"></audio>
+<div class="social_header">
+    <a href="/albums.html">Albums</a>
+    <a href="/singles.html" style="color: rgb(200,0,0);">Singles</a>
+    <a href="/">Social links</a>
+</div>
+<div class="singles_singles">
+</div>
+<script>
+let audioElement = document.getElementById("audioElement")
+let isPlaying = false
+async function init(json_src) {
+    let rgb;
+    let gradient;
+    let response = await fetch(json_src)
+
+    if(response.ok){
+        let tracksRAW = await response.json()
+        let tracks = tracksRAW.filter(el => el.single_name)
+        tracks.forEach(track => {
+            let singleSafeId = track.single_name.replace('.mp3','').replace(/\ |\d+/g, '')
+            $('.singles_singles').append(`
+                <div class="singles_single" data-track="${singleSafeId}">
+                    <img src="${track.imgUrl}" id="hiddenImage${singleSafeId}" style="display: none;" crossorigin="anonymous">
+                    <button align="left" class="playTrack" id="button${singleSafeId}" style="background: ${gradient}); right: 80%; top: 61.5%; position: absolute;">⨞</button>
+                    <img src="${track.imgUrl}" width="300px">
+                    <p>${track.single_name.replace('.mp3','')}</p>
+                </div>
+            `)
+            $('.singles_singles').on('click', '.playTrack', function(){
+                if($(this).text() == "⨞" && !isPlaying){
+                    $('.playTrack').text("⨞")
+                    let trackName = $(this).closest("[data-track]").data("track")
+                    let trackFind = tracks.find(el => el.single_name.replace('.mp3','').replace(/\ |\d+/g, '') == trackName)
+                    audioElement.src = trackFind.url
+                    audioElement.play()
+                    $(this).text("||")
+                }else{
+                    if(isPlaying) {
+                        audioElement.pause()
+                        $(this).text("⨞")
+                    }
+                }
+            })
+            $(`#hiddenImage${singleSafeId}`).on("load", function(){
+                const colorThief = new ColorThief()
+                const dominantColor = colorThief.getColor(this)
+                rgb = `rgb(${dominantColor.join(',')})`
+                gradient = `linear-gradient(45deg, rgb(50, 0, 0), ${rgb}`
+                $(`#button${singleSafeId}`).css('background', gradient)
+            })
+        })
+    }
+}
+audioElement.addEventListener("playing", () => isPlaying = true)
+audioElement.addEventListener("pause", () => isPlaying = false)
+init('public/tracks.json')
+</script>
+</body>
+</html>
