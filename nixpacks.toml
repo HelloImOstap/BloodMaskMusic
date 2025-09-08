@@ -1,8 +1,11 @@
 [phases.setup]
-nixPkgs = ["python3", "gcc", "ffmpeg"]
+nixPkgs = ["python3Full", "gcc", "ffmpeg"]
 
 [phases.install]
-cmds = ["python -m pip install --upgrade pip", "python -m pip install -r requirements.txt"]
+cmds = [
+  "python -m pip install --upgrade pip",
+  "python -m pip install -r requirements.txt"
+]
 
 [start]
 cmd = "python bot.py"
