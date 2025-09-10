@@ -20,7 +20,8 @@ async def download_mp3(update, context):
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
-                'preferredquality': '320'
+                'preferredquality': '320',
+                "cookiefile": "cookies.txt"   
             }]
         }
         try:
@@ -72,7 +73,8 @@ async def download_mp4(update, context):
         url = context.args[0]
         ydl_opts = {
             "format": "mp4[height<=720]",  # максимум 720p
-            "outtmpl": "downloads/%(title)s.%(ext)s"
+            "outtmpl": "downloads/%(title)s.%(ext)s",
+            "cookiefile": "cookies.txt"   
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -110,4 +112,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
