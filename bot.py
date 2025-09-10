@@ -21,8 +21,7 @@ async def download_mp3(update, context):
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '320'
-            }],
-            'ffmpeg_location': 'D:/FFMPEG/ffmpeg-8.0-full_build/bin'
+            }]
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl: 
@@ -73,8 +72,7 @@ async def download_mp4(update, context):
         url = context.args[0]
         ydl_opts = {
             "format": "mp4[height<=720]",  # максимум 720p
-            "outtmpl": "downloads/%(title)s.%(ext)s",
-            "ffmpeg_location": "D:/FFMPEG/ffmpeg-8.0-full_build/bin"
+            "outtmpl": "downloads/%(title)s.%(ext)s"
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -112,3 +110,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
