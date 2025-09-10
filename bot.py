@@ -17,7 +17,7 @@ async def download(update, context):
                 'preferredcodec': 'mp3',
                 'preferredquality': '320'
             }],
-            'cookiefile': "cookie.json"
+            'cookiefile': "cookie.txt"
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl: 
@@ -58,5 +58,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
