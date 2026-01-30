@@ -8,4 +8,4 @@ RUN apt update && apt install -y \
 
 RUN pip install -U yt-dlp
 
-CMD ["python", "main.py"]
+CMD ["python", "bot.py"]
